@@ -108,7 +108,7 @@ class TestClassDDB:
                 "key": "key_1",
                 "sort": "range_1",
                 "some_extra_data": "extra_data"
-            } 
+            }
 
             client = AWSDynamoDB()
             client.set_table_name("Table")
