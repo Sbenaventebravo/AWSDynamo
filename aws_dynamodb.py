@@ -9,8 +9,8 @@ from singleton import SingletonMeta
 
 
 class AWSDynamoDB(metaclass=SingletonMeta):
-    def __init__(self, table_name=''):
-        self.dynamodb = boto3.resource('dynamodb')
+    def __init__(self, table_name='', region_name="us-east-1"):
+        self.dynamodb = boto3.resource('dynamodb', region_name)
         self.table_name = table_name
         self.table = self.dynamodb.Table(self.table_name)
 
