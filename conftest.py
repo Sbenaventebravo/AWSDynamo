@@ -9,6 +9,7 @@ def aws_credentials():
     """ Mock AWS credentials """
     os.environ["AWS_ACCESS_KEY_ID"] = "testing"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_REGION"] = "testing_region"
 
 @pytest.yield_fixture(scope="module")
 def dynamodb_client(aws_credentials):
