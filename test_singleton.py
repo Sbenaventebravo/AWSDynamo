@@ -10,6 +10,7 @@ def test_singleton_pattern_works():
 
     assert first_client is second_client
 
+
 def test_singleton_pattern_not_applyied():
     class Client():
         pass

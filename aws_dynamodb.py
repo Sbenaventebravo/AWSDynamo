@@ -7,7 +7,6 @@ from botocore.exceptions import ClientError
 from singleton import SingletonMeta
 
 
-
 class AWSDynamoDB(metaclass=SingletonMeta):
     def __init__(self, table_name='', region_name="us-east-1"):
         self.dynamodb = boto3.resource('dynamodb', region_name)
@@ -24,16 +23,13 @@ class AWSDynamoDB(metaclass=SingletonMeta):
             exist = self.table.table_status in ("CREATING", "UPDATING", "DELETING", "ACTIVE")
         except ClientError:
             logging.error("Table: {} not found".format(self.table_name))
-        
+
         return exist
 
     def put_item(self, item) -> dict:
         result = {}
-        try: 
+        try:
             response = self.table.put_item(Item=item)
-            http_response = response.get("ResponseMetadata", {}).get(
-                "HTTPStatusCode"
-            )
             result["status"] = "success"
             result["item"] = item
         except ClientError as ex:
@@ -49,11 +45,10 @@ class AWSDynamoDB(metaclass=SingletonMeta):
             result["status"] = "error"
             result["message_error"] = str(ex)
         return result
-        
 
     def get_item(self, primary_key) -> dict:
         result = {}
-        try: 
+        try:
             response = self.table.get_item(
                 Key={
                     **primary_key
