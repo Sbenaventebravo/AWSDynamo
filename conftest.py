@@ -15,5 +15,5 @@ def aws_credentials():
 def dynamodb_client(aws_credentials):
     """DDB mock client"""
     with mock_dynamodb2():
-        conn = boto3.resource('dynamodb')
+        conn = boto3.resource('dynamodb', region_name="testing_region")
         yield conn
