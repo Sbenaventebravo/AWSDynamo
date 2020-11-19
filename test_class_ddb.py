@@ -1,9 +1,8 @@
 
-import pytest
-from botocore.exceptions import ClientError
 from contextlib import contextmanager
 
 from aws_dynamodb import AWSDynamoDB
+
 
 @contextmanager
 def ddb_table_setup(dynamodb_client):
@@ -35,10 +34,11 @@ def ddb_table_setup(dynamodb_client):
                 'WriteCapacityUnits': 5
             }
         )
-    
+
     yield
     table = dynamodb_client.Table("Table")
     table.delete()
+
 
 @contextmanager
 def ddb_table_with_previous_data(dynamodb_client):
@@ -101,7 +101,6 @@ class TestClassDDB:
             client.set_table_name("no existing table")
             expected = client.table_exist()
             assert expected == False
-        
 
     def test_put_item_success(self, dynamodb_client):
         with ddb_table_setup(dynamodb_client):
@@ -140,11 +139,10 @@ class TestClassDDB:
             client.set_table_name("Table")
             expected = client.get_item({"key": "key", "sort": ""})
             assert expected == {'item': {}, 'status': 'success'}
-    
+
     def test_get_item_fail(self, dynamodb_client):
         with ddb_table_with_previous_data(dynamodb_client):
             client = AWSDynamoDB()
             client.set_table_name("Table")
             expected = client.get_item({"bad schema": "no value"})
             assert expected == {'status': 'error', 'message_error': 'An error occurred (ValidationException) when calling the GetItem operation: Validation Exception'}
-        
