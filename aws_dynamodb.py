@@ -10,24 +10,25 @@ from singleton import SingletonMeta
 
 class AWSDynamoDB(metaclass=SingletonMeta):
     def __init__(self, table_name='', env=""):
-        self.session = self.make_session(env)
-        self.dynamodb = self.session.resource('dynamodb')
+        self.credentials = get_credentials(env)
+        self.session = self.make_session()
+        self.dynamodb = self.session.resource(
+            'dynamodb',
+            region_name=self.credentials["AWS_REGION"]
+        )
         self.table_name = table_name
         self.table = self.dynamodb.Table(self.table_name)
 
-    def make_session(self, env="") -> boto3.session.Session:
-        """ Make boto3 session for the operations
-            Args:
-                env     (str): environment name
+    def make_session(self) -> boto3.session.Session:
+        """ Make boto3 session for the operations, attach aws credentials
             Returns:
                 (boto3.session.Session) returns boto3 objet for sessions
 
         """
-        credentials = get_credentials()
         return boto3.session.Session(
-            aws_access_key_id=credentials["AWS_ACCESS_KEY_ID"],
-            aws_secret_access_key=credentials["AWS_SECRET_ACCESS_KEY"],
-            region_name=credentials["AWS_REGION"]
+            aws_access_key_id=self.credentials["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=self.credentials["AWS_SECRET_ACCESS_KEY"],
+            region_name=self.credentials["AWS_REGION"]
         )
 
     def set_table_name(self, table_name) -> None:
