@@ -9,12 +9,12 @@ from singleton import SingletonMeta
 
 
 class AWSDynamoDB(metaclass=SingletonMeta):
-    def __init__(self, table_name='', env=""):
+    def __init__(self, table_name='', env="", region_name="us-east-2"):
         self.credentials = get_credentials(env)
         self.session = self.make_session()
         self.dynamodb = self.session.resource(
             'dynamodb',
-            region_name=self.credentials["AWS_REGION"]
+            region_name=region_name
         )
         self.table_name = table_name
         self.table = self.dynamodb.Table(self.table_name)
