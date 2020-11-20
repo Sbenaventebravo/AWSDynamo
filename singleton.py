@@ -1,5 +1,6 @@
 
 class SingletonMeta(type):
+    """Metaclass for Singleton desing pattern implementation"""
     _instances = {}
 
     def __call__(cls, *args, **kwargs):

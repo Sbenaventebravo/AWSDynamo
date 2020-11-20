@@ -6,6 +6,9 @@ from aws_dynamodb import AWSDynamoDB
 
 @contextmanager
 def ddb_table_setup(dynamodb_client):
+    """Generate a context mananger who first creates a table
+        and finally deletes it
+    """
     dynamodb_client.create_table(
             TableName="Table",
             KeySchema=[
@@ -34,7 +37,7 @@ def ddb_table_setup(dynamodb_client):
                 'WriteCapacityUnits': 5
             }
         )
-
+    table = dynamodb_client.Table("Table")
     yield
     table = dynamodb_client.Table("Table")
     table.delete()
@@ -42,6 +45,9 @@ def ddb_table_setup(dynamodb_client):
 
 @contextmanager
 def ddb_table_with_previous_data(dynamodb_client):
+    """Generate a context mananger who first creates a table and a register
+        and finally deletes the register and the table
+    """
     dynamodb_client.create_table(
             TableName="Table",
             KeySchema=[
@@ -89,84 +95,12 @@ def ddb_table_with_previous_data(dynamodb_client):
 
 class TestClassDDB:
     def test_table_exist(self, dynamodb_client):
+        """ Verify if the table_exist function can
+            validate if the table exist
+        """
         with ddb_table_setup(dynamodb_client):
             client = AWSDynamoDB()
             client.set_table_name("Table")
+            print(client.dynamodb.meta)
             expected = client.table_exist()
             assert expected is True
-
-    def test_table_not_exist(self, dynamodb_client):
-        with ddb_table_setup(dynamodb_client):
-            client = AWSDynamoDB()
-            client.set_table_name("no existing table")
-            expected = client.table_exist()
-            assert expected is False
-
-    def test_put_item_success(self, dynamodb_client):
-        with ddb_table_setup(dynamodb_client):
-            data_input = {
-                "key": "key_1",
-                "sort": "range_1",
-                "some_extra_data": "extra_data"
-            }
-
-            client = AWSDynamoDB()
-            client.set_table_name("Table")
-            expected = client.put_item(data_input)
-            assert expected == {
-                "status": "success",
-                "item": data_input
-            }
-
-    def test_put_item_fail(self, dynamodb_client):
-        with ddb_table_setup(dynamodb_client):
-            data_input = {
-                "fail_schema": "no data schema"
-            }
-            client = AWSDynamoDB()
-            client.set_table_name("Table")
-            expected = client.put_item(data_input)
-            assert expected == {
-                'status': 'error',
-                'message_error': (
-                    'An error occurred (ValidationException)'
-                    ' when calling the PutItem operation:'
-                    ' One or more parameter values were invalid:'
-                    ' Missing the key key in the item'
-                )
-            }
-
-    def test_get_item_success_item_found(self, dynamodb_client):
-        with ddb_table_with_previous_data(dynamodb_client):
-            client = AWSDynamoDB()
-            client.set_table_name("Table")
-            expected = client.get_item({"key": "key", "sort": "sort"})
-            assert expected == {
-                'item': {
-                    'data': {},
-                    'key': 'key',
-                    'sort': 'sort'
-                },
-                'status': 'success'
-            }
-
-    def test_get_item_success_item_not_found(self, dynamodb_client):
-        with ddb_table_with_previous_data(dynamodb_client):
-            client = AWSDynamoDB()
-            client.set_table_name("Table")
-            expected = client.get_item({"key": "key", "sort": ""})
-            assert expected == {'item': {}, 'status': 'success'}
-
-    def test_get_item_fail(self, dynamodb_client):
-        with ddb_table_with_previous_data(dynamodb_client):
-            client = AWSDynamoDB()
-            client.set_table_name("Table")
-            expected = client.get_item({"bad schema": "no value"})
-            assert expected == {
-                'status': 'error',
-                'message_error': (
-                    'An error occurred (ValidationException)'
-                    ' when calling the GetItem operation:'
-                    ' Validation Exception'
-                )
-            }
