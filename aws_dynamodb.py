@@ -20,7 +20,12 @@ class AWSDynamoDB(metaclass=SingletonMeta):
     def table_exist(self) -> bool:
         exist = False
         try:
-            exist = self.table.table_status in ("CREATING", "UPDATING", "DELETING", "ACTIVE")
+            exist = self.table.table_status in (
+                "CREATING",
+                "UPDATING",
+                "DELETING",
+                "ACTIVE"
+            )
         except ClientError:
             logging.error("Table: {} not found".format(self.table_name))
 
@@ -29,7 +34,7 @@ class AWSDynamoDB(metaclass=SingletonMeta):
     def put_item(self, item) -> dict:
         result = {}
         try:
-            response = self.table.put_item(Item=item)
+            self.table.put_item(Item=item)
             result["status"] = "success"
             result["item"] = item
         except ClientError as ex:
