@@ -40,6 +40,14 @@ class AWSDynamoDB(metaclass=SingletonMeta):
         self.table_name = table_name
         self.table = self.dynamodb.Table(self.table_name)
 
+    def get_table_schema(self) -> dict:
+        """ Retrives the Table schema, as a resouce for the developer
+            Returns:
+                (list): Returns a list with the attribute definitions
+        """
+
+        return self.table.attribute_definitions
+
     def table_exist(self) -> bool:
         """ Identify if the current table conection exist.
             Returns:
@@ -71,13 +79,13 @@ class AWSDynamoDB(metaclass=SingletonMeta):
         result = {}
         try:
             item = {
-                key: (Decimal(value) if isinstance(value, float) else value)
+                key: (Decimal(str(value)) if isinstance(value, float) else value)
                 for key, value in item.items()
             }
             self.table.put_item(Item=item)
             result["status"] = "success"
             result["item"] = item
-        except ClientError as ex:
+        except Exception as ex:
             logging.error((
                 "Error in put item, table_name:{},"
                 " data_send:{},"
@@ -111,7 +119,7 @@ class AWSDynamoDB(metaclass=SingletonMeta):
             result["status"] = "success"
             result["item"] = item
 
-        except ClientError as ex:
+        except Exception as ex:
             logging.error((
                 "Error in get item, table_name:{},"
                 " primary_key_send:{},"
