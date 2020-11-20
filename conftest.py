@@ -13,6 +13,6 @@ def dynamodb_client():
             aws_secret_access_key="test",
             region_name="us-east-2"
         )
-        conn = session.resource('dynamodb')
+        conn = session.resource('dynamodb', region_name="us-east-2")
 
         yield conn
