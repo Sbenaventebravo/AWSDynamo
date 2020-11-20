@@ -15,7 +15,7 @@ class AWSDynamoDB(metaclass=SingletonMeta):
         self.dynamodb = self.session.resource(
             'dynamodb',
             region_name=region_name
-        )
+        )  # situacion extraña
         self.table_name = table_name
         self.table = self.dynamodb.Table(self.table_name)
 
