@@ -2,6 +2,7 @@ from singleton import SingletonMeta
 
 
 def test_singleton_pattern_works():
+    """Testing if the singleton pattern only generates a unique object"""
     class Client(metaclass=SingletonMeta):
         pass
 
@@ -12,6 +13,7 @@ def test_singleton_pattern_works():
 
 
 def test_singleton_pattern_not_applyied():
+    """Testing if the without singleton two object are not equals"""
     class Client():
         pass
 

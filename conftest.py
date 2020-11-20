@@ -1,21 +1,18 @@
-import os
 import boto3
 import pytest
 
 from moto import mock_dynamodb2
 
 
-@pytest.fixture(scope='module')
-def aws_credentials():
-    """ Mock AWS credentials """
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_REGION"] = "testing_region"
-
-
 @pytest.yield_fixture(scope="module")
-def dynamodb_client(aws_credentials):
+def dynamodb_client():
     """DDB mock client"""
     with mock_dynamodb2():
-        conn = boto3.resource('dynamodb', region_name="us-east-1")
+        session = boto3.session.Session(
+            aws_access_key_id="test",
+            aws_secret_access_key="test",
+            region_name="us-east-2"
+        )
+        conn = session.resource('dynamodb')
+
         yield conn

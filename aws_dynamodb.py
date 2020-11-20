@@ -1,23 +1,50 @@
-
 import boto3
 import logging
+from decimal import Decimal
 
 from botocore.exceptions import ClientError
 
+from config_loader import get_credentials
 from singleton import SingletonMeta
 
 
 class AWSDynamoDB(metaclass=SingletonMeta):
-    def __init__(self, table_name='', region_name="us-east-1"):
-        self.dynamodb = boto3.resource('dynamodb', region_name)
+    def __init__(self, table_name='', env=""):
+        self.session = self.make_session(env)
+        self.dynamodb = self.session.resource('dynamodb')
         self.table_name = table_name
         self.table = self.dynamodb.Table(self.table_name)
 
+    def make_session(self, env="") -> boto3.session.Session:
+        """ Make boto3 session for the operations
+            Args:
+                env     (str): environment name
+            Returns:
+                (boto3.session.Session) returns boto3 objet for sessions
+
+        """
+        credentials = get_credentials()
+        return boto3.session.Session(
+            aws_access_key_id=credentials["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=credentials["AWS_SECRET_ACCESS_KEY"],
+            region_name=credentials["AWS_REGION"]
+        )
+
     def set_table_name(self, table_name) -> None:
+        """ Changes the table conection in the client
+            Args:
+                table_name     (str): ddb table name
+
+        """
         self.table_name = table_name
         self.table = self.dynamodb.Table(self.table_name)
 
     def table_exist(self) -> bool:
+        """ Identify if the current table conection exist.
+            Returns:
+                (bool) Return True if exist else otherwise
+
+        """
         exist = False
         try:
             exist = self.table.table_status in (
@@ -32,8 +59,20 @@ class AWSDynamoDB(metaclass=SingletonMeta):
         return exist
 
     def put_item(self, item) -> dict:
+        """ Insert or update an item in the ddb table
+            Args:
+                item    (dict): table record, you need know
+                                 table schema to push data
+            Returns:
+                (dict) Return a dictionary with the pushed data or error raised
+
+        """
         result = {}
         try:
+            item = {
+                key: (Decimal(value) if isinstance(value, float) else value)
+                for key, value in item.items()
+            }
             self.table.put_item(Item=item)
             result["status"] = "success"
             result["item"] = item
@@ -52,6 +91,14 @@ class AWSDynamoDB(metaclass=SingletonMeta):
         return result
 
     def get_item(self, primary_key) -> dict:
+        """ get an item in the ddb table
+            Args:
+                primary_key     (dict): table key, you need know
+                                 table schema to push data
+            Returns:
+                (dict) Return a dictionary with the getted data or error raised
+
+        """
         result = {}
         try:
             response = self.table.get_item(
@@ -75,4 +122,5 @@ class AWSDynamoDB(metaclass=SingletonMeta):
             )
             result["status"] = "error"
             result["message_error"] = str(ex)
+
         return result

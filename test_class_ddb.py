@@ -6,6 +6,9 @@ from aws_dynamodb import AWSDynamoDB
 
 @contextmanager
 def ddb_table_setup(dynamodb_client):
+    """Generate a context mananger who first creates a table
+        and finally deletes it
+    """
     dynamodb_client.create_table(
             TableName="Table",
             KeySchema=[
@@ -34,7 +37,7 @@ def ddb_table_setup(dynamodb_client):
                 'WriteCapacityUnits': 5
             }
         )
-
+    table = dynamodb_client.Table("Table")
     yield
     table = dynamodb_client.Table("Table")
     table.delete()
@@ -42,6 +45,9 @@ def ddb_table_setup(dynamodb_client):
 
 @contextmanager
 def ddb_table_with_previous_data(dynamodb_client):
+    """Generate a context mananger who first creates a table and a register
+        and finally deletes the register and the table
+    """
     dynamodb_client.create_table(
             TableName="Table",
             KeySchema=[
@@ -89,6 +95,9 @@ def ddb_table_with_previous_data(dynamodb_client):
 
 class TestClassDDB:
     def test_table_exist(self, dynamodb_client):
+        """ Verify if the table_exist function can
+            validate if the table exist
+        """
         with ddb_table_setup(dynamodb_client):
             client = AWSDynamoDB()
             client.set_table_name("Table")
@@ -96,6 +105,9 @@ class TestClassDDB:
             assert expected is True
 
     def test_table_not_exist(self, dynamodb_client):
+        """ Verify if the table_exist function can
+            validate if the table not exists
+        """
         with ddb_table_setup(dynamodb_client):
             client = AWSDynamoDB()
             client.set_table_name("no existing table")
@@ -103,6 +115,9 @@ class TestClassDDB:
             assert expected is False
 
     def test_put_item_success(self, dynamodb_client):
+        """ Verify if the put_item function can
+            add a new register
+        """
         with ddb_table_setup(dynamodb_client):
             data_input = {
                 "key": "key_1",
@@ -119,6 +134,9 @@ class TestClassDDB:
             }
 
     def test_put_item_fail(self, dynamodb_client):
+        """ Verify if the put_item function can
+            tolerates faliure events
+        """
         with ddb_table_setup(dynamodb_client):
             data_input = {
                 "fail_schema": "no data schema"
@@ -137,6 +155,9 @@ class TestClassDDB:
             }
 
     def test_get_item_success_item_found(self, dynamodb_client):
+        """ Verify if the get_item function can
+            get an existing register
+        """
         with ddb_table_with_previous_data(dynamodb_client):
             client = AWSDynamoDB()
             client.set_table_name("Table")
@@ -151,6 +172,9 @@ class TestClassDDB:
             }
 
     def test_get_item_success_item_not_found(self, dynamodb_client):
+        """ Verify if the get_item function can
+            get an non existing register
+        """
         with ddb_table_with_previous_data(dynamodb_client):
             client = AWSDynamoDB()
             client.set_table_name("Table")
@@ -158,6 +182,9 @@ class TestClassDDB:
             assert expected == {'item': {}, 'status': 'success'}
 
     def test_get_item_fail(self, dynamodb_client):
+        """ Verify if the get_item function can
+            tolerates faliure events
+        """
         with ddb_table_with_previous_data(dynamodb_client):
             client = AWSDynamoDB()
             client.set_table_name("Table")
