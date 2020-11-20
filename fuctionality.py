@@ -5,8 +5,8 @@ if __name__ == "__main__":
 
     client = AWSDynamoDB()
     client.set_table_name("Test")
-    client.get_table_schema()
-    """
+    print(client.get_table_schema())
+    
     uuid = uuid.uuid1()
     region = "#Chile"
     extra_data = {
@@ -23,15 +23,16 @@ if __name__ == "__main__":
 
     }
     if client.table_exist:
+        """
         # Create or update element
         response = client.put_item(data_send)
         print(response)
-
+        """
         # get element
         primary_key = {
-            "uuid": str(uuid),
-            "region": region
+            "uuid": "3d19e05e-2b66-11eb-b485-3ca067b2df49",
+            "region": "#Chile"
         }
         response = client.get_item(primary_key)
         print(response)
-    """
+    

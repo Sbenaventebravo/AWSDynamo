@@ -133,3 +133,4 @@ class AWSDynamoDB(metaclass=SingletonMeta):
             result["message_error"] = str(ex)
 
         return result
+
